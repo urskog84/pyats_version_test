@@ -1,0 +1,67 @@
+Comprehensive Example
+=====================
+
+This is a comprehensive example script written using the pyATS AEtest template.
+Tihs example should be automatically copied into your pyATS instance as part
+of the installation process.
+
+The goal of this example is to demonstrate the following basics:
+
+    - how AEtest works: features & flow
+    - writing a straighforward, basic testscript:
+        - script components and structure
+        - various script features
+    - script inheritance & variance
+    - driving testscript with data/parameters
+    - passing arguments from jobfile/commandline into the testscript.
+    - importing local libraries & etc.
+
+and is written to be self-explanatory. It is intended to act as a semi-guide,
+walking users through important features and explaining them using live
+examples, supplementing the full user guide at:
+    http://wwwin-pyats.cisco.com/documentation/html/
+
+This example is executable both under standalone execution, and through easypy.
+You can modify parts of this code to see how it changes execution behaviors.
+
+NOTE:
+    Certain parts of this comprehensive example script does not follow the
+    template to-the-tee, opting for a more fluid, linear-flow instead of
+    full-scale abstraction. This is intentional.
+
+This testscript is written using the AEtest template @ $VIRTUAL_ENV/templates/.
+
+    Folder Structure
+    ----------------
+        $VIRTUAL_ENV/examples/comprehensive/
+        |-- README
+        |-- base_example.py
+        |-- variant_example.py
+        |-- job
+        |   `-- example_job.py
+        |-- etc
+        |   `-- example_testbed.yaml
+        |-- testcases
+        |   |-- __init__.py
+        |   `-- comprehensive_testcases.py
+        `-- libs
+            |-- __init__.py
+            `-- local_library.py
+
+Each file listed above contains appropriate headers describing their usages.
+To run example, activate your pyATS instance, and:
+
+cd $VIRTUAL_ENV/examples/comprehensive/
+
+For Standalone Execution
+------------------------
+
+bash$ python base_example.py --testbed etc/example_testbed.yaml
+bash$ python variant_example.py --testbed etc/example_testbed.yaml
+
+For Easypy Execution
+--------------------
+
+bash$ pyats run job job/example_job.py --testbed-file etc/example_testbed.yaml
+
+--------------------------------------------------------------------------------

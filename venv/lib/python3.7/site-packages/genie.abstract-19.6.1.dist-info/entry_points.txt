@@ -1,0 +1,3 @@
+[pyats.utils.__legacy_imports__]
+abstract = genie.abstract:_IMPORTMAP
+

@@ -1,0 +1,75 @@
+spitfire_login:
+  prompt: "Username: "
+  commands:
+    "cisco":
+      new_state: spitfire_pw
+
+spitfire_pw:
+  prompt: "Password: "
+  commands:
+    "cisco123":
+      response: |
+        SYSTEM CONFIGURATION COMPLETED
+      new_state: spitfire_enable
+
+spitfire_enable:
+  prompt: RP/0/RP0/CPU0:%N#
+  commands:
+    "ctrl":
+      new_state: spitfire_bmc
+    "term length 0": ""
+    "term width 0": ""
+    "configure terminal":
+      new_state: spitfire_config
+    "show version": file|mock_data/iosxr/spitfire/show_version.txt
+    "bash cat /etc/build-info.txt": file|mock_data/iosxr/spitfire/build-info.txt
+    "show platform": file|mock_data/iosxr/spitfire/show_platform.txt
+    "bash":
+      new_state: spitfire_xr_bash
+    "run":
+      new_state: spitfire_xr_run
+
+spitfire_bmc:
+  prompt: "root@spitfire-arm:~#"
+  commands:
+    "ctrl":
+      new_state: spitfire_enable
+
+spitfire_xr_bash:
+  prompt: "[ios:/misc/scratch]$"
+  commands:
+    "exit":
+      new_state: spitfire_enable
+    "xrenv":
+      new_state: spitfire_xr_env
+
+spitfire_xr_run:
+  prompt: "[node0_RP0_CPU0:~]$"
+  commands:
+    "exit":
+      new_state: spitfire_enable
+    "xrenv":
+      new_state: spitfire_xr_env
+
+spitfire_xr_env:
+  prompt: "XR[ios:~]$"
+  commands:
+    "exit":
+      new_state: spitfire_xr_bash
+
+spitfire_config:
+  prompt: "RP/0/RP0/CPU0:%N(config)#"
+  commands: &config_cmds
+    "end":
+      new_state: spitfire_enable
+    "logging console disable": ""
+    "line console": ""
+    "exec-timeout 0": ""
+    "absolute-timeout 0": ""
+    "exec-timeout 0 0": ""
+    "absolute-timeout 0": ""
+    "session-timeout 0": ""
+    "line default": ""
+    "commit": ""
+
+
