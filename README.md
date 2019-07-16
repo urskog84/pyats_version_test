@@ -11,3 +11,5 @@ spesify the two vaiables, it's mndatory for the creation of the tesbed
 
 # To run the test
 'easypy version_check_job.py'
+## with html report
+easypy version_check_job.py -html_logs html_logs/
