@@ -117,6 +117,63 @@ class IOS_version_ceck(aetest.Testcase):
         self.passed("All devices have correct Version")
 
 
+class LLDP_check(aetest.Testcase):
+    
+    @ aetest.test
+    def learn_lldp(self):
+        
+        self.lldp = {}
+        for ios_device in self.parameters['dev']:
+            log.info(banner("Gathering LLDP Information from {}".format(
+                ios_device.name
+                )))
+            try:
+                lldp = ios_device.parse("show lldp")
+            except:
+                self.failed("No output off 'show lldp commnad")
+            self.lldp[ios_device.name] = lldp
+            self.passed("lldp lernd")
+        
+            
+    @ aetest.test
+    def check_lldp(self):
+        mega_dict = {}
+        mega_tabular = []
+        for device, lldp in self.lldp.items():
+            if lldp:
+                mega_dict[device] = {}
+                status = lldp['status']
+                enabled = lldp['enabled']
+                smaller_tabular = []
+                if enabled:
+                    mega_dict[device]['lldp'] = lldp
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(status)
+                    smaller_tabular.append(enabled)
+                    smaller_tabular.append('Passed')
+                else:
+                    mega_dict[device]['lldp'] = lldp
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(status)
+                    smaller_tabular.append(enabled)
+                    smaller_tabular.append('Failed')
+    
+            mega_tabular.append(smaller_tabular)
+        
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'status', 'enabled', 'Passed/Failed'],
+                          tablefmt='orgtbl'
+                          ))
+        
+        for device in mega_dict:
+            for version in mega_dict[device]:
+                if not mega_dict[device]['lldp']:
+                    self.failed("{d}: lldp is not enabeld shoud be: {check_ver}".format(
+                        d=device, enabled=enabled, check_ver=enabled))
+
+        self.passed("All devices have lldp enabeld")
+        
+
 # #####################################################################
 # ####                       COMMON CLEANUP SECTION                 ###
 # #####################################################################
