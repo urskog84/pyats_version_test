@@ -76,7 +76,7 @@ def create_testbed(inventory_path, group_name):
                     os =  'ios',
                     tacacs={
                         'username': os.environ.get('PYATS_USERNAME'),
-                        'login_prompt': 'login:',
+                        'login_prompt': 'login as:',
                         'password_prompt': 'Password:',
                     },
                     passwords={
@@ -87,7 +87,7 @@ def create_testbed(inventory_path, group_name):
                     connections =  {
                         'ssh': { 
                             'protocol' : 'ssh',
-                            'ip': host_vars['mgmt_ip']
+                            'ip': host_vars['mgmtip']
                             }
                     })
         dev.os =  "ios"
