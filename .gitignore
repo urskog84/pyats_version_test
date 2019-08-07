@@ -5,3 +5,4 @@ env.sh
 *.pyc
 __pycache__/*
 __pycache__/testbed_from_inventory.cpython-37.pyc
+config.ini
