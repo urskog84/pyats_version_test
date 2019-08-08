@@ -1,35 +1,33 @@
 #!/bin/env python
 
-# To get a logger for the script
+from testbed_from_inventory import create_testbed
 import logging
-
-# To build the table at the end
 from tabulate import tabulate
-
-# Needed for aetest script
 from ats import aetest
 from ats.log.utils import banner
-
-# Genie Imports
 from genie.conf import Genie
 from genie.abstract import Lookup
-
-# import the genie libs
 from genie.libs import ops  # noqa
+import configparser
+
 
 # Get your logger for your script
 log = logging.getLogger(__name__)
 
-from testbed_from_inventory import create_testbed
+config = configparser.ConfigParser()
+config.read("config.ini")
 
+inventory_path = config.get("inventory", "path")
+group_name = config.get("inventory", "group_name")
 
-inventory_path = "/git/awx-site/inventorys/staging/inventory.ini"
-group_name = "site-switches"
-#testbed = create_testbed(inventory_path, group_name)
+tacacs_user = config.get("credential", "PYATS_USERNAME")
+tacacs_password = config.get("credential", "PYATS_PASSWORD")
+
 
 ###################################################################
 #                  COMMON SETUP SECTION                           #
 ###################################################################
+
 
 class common_setup(aetest.CommonSetup):
     """ Common Setup section """
@@ -40,7 +38,8 @@ class common_setup(aetest.CommonSetup):
     # Connect to each device in the testbed
     @aetest.subsection
     def connect(self, testbed):
-        genie_testbed =  create_testbed(inventory_path, group_name)
+        genie_testbed = create_testbed(
+            inventory_path, group_name, tacacs_user, tacacs_password)
         self.parent.parameters['testbed'] = genie_testbed
         device_list = []
         for device in genie_testbed.devices.values():
@@ -64,22 +63,21 @@ class common_setup(aetest.CommonSetup):
 
 # Testcase : version
 class IOS_version_ceck(aetest.Testcase):
-    
+
     @ aetest.test
     def learn_version(self):
-        
+
         self.version_info = {}
         for ios_device in self.parent.parameters['dev']:
             log.info(banner("Gathering Version Information from {}".format(
                 ios_device.name
-                )))
+            )))
             version_info = ios_device.parse("show version")
             self.version_info[ios_device.name] = version_info['version']
 
-    
     @ aetest.test
     def check_version(self):
-        
+
         mega_dict = {}
         mega_tabular = []
         for device, version in self.version_info.items():
@@ -93,9 +91,9 @@ class IOS_version_ceck(aetest.Testcase):
                 check_ver = '03.06.08E'
             else:
                 check_ver = 'Uknown platform'
-            
+
             if version_long:
-                smaller_tabular = []    
+                smaller_tabular = []
                 if check_ver == version_long:
                     mega_dict[device]['version_long'] = version_long
                     mega_dict[device]['check_ver'] = check_ver
@@ -119,14 +117,15 @@ class IOS_version_ceck(aetest.Testcase):
         mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
 
         log.info(tabulate(mega_tabular,
-                          headers=['Device', 'platform', 'version', 'check_ver', 'Passed/Failed'],
+                          headers=['Device', 'platform', 'version',
+                                   'check_ver', 'Passed/Failed'],
                           tablefmt='orgtbl'
                           ))
-        
+
         for device in mega_dict:
             for version in mega_dict[device]:
 
-                if not mega_dict[device]['version_long'] == mega_dict[device]['check_ver'] :
+                if not mega_dict[device]['version_long'] == mega_dict[device]['check_ver']:
                     self.failed("switch {d} is on platform {p}. current running version is {current_version} shoud be: {check_ver}".format(
                         d=device, current_version=mega_dict[device]['version_long'], check_ver=mega_dict[device]['check_ver'], p=mega_dict[device]['platform']))
 
@@ -134,22 +133,21 @@ class IOS_version_ceck(aetest.Testcase):
 
 
 class LLDP_check(aetest.Testcase):
-    
+
     @ aetest.test
     def learn_lldp(self):
-        
+
         self.lldp = {}
         for ios_device in self.parent.parameters['dev']:
             log.info(banner("Gathering LLDP Information from {}".format(
                 ios_device.name
-                )))
+            )))
             try:
                 lldp = ios_device.parse("show lldp")
             except:
                 self.failed("No output off 'show lldp commnad")
             self.lldp[ios_device.name] = lldp
-        
-            
+
     @ aetest.test
     def check_lldp(self):
         mega_dict = {}
@@ -159,7 +157,7 @@ class LLDP_check(aetest.Testcase):
             if lldp:
                 status = lldp['status']
                 enabled = lldp['enabled']
-    
+
                 smaller_tabular = []
                 if enabled:
                     mega_dict[device]['lldp'] = lldp
@@ -178,10 +176,11 @@ class LLDP_check(aetest.Testcase):
     #    mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
 
         log.info(tabulate(mega_tabular,
-                          headers=['Device', 'status', 'enabled', 'Passed/Failed'],
+                          headers=['Device', 'status',
+                                   'enabled', 'Passed/Failed'],
                           tablefmt='orgtbl'
                           ))
-        
+
         for device in mega_dict:
             for lldp in mega_dict[device]:
                 if not mega_dict[device]['lldp']:
@@ -253,7 +252,7 @@ class CRC_count_check(aetest.Testcase):
                         d=dev, name=intf, e=mega_dict[dev][intf]))
 
         self.passed("All devices' interfaces CRC ERRORS Count is: 'Zero'")
-        
+
 
 # #####################################################################
 # ####                       COMMON CLEANUP SECTION                 ###

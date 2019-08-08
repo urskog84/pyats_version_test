@@ -7,11 +7,11 @@ from genie.libs import ops  # noqa
 from pyats.topology import Testbed, Device
 import configparser
 
-config = configparser.ConfigParser()
-config.read("config.ini")
-
-tacacs_user = config.get("DEFAULT", "PYATS_USERNAME")
-tacacs_password = config.get("DEFAULT", "PYATS_PASSWORD")
+#config = configparser.ConfigParser()
+# config.read("config.ini")
+#
+#tacacs_user = config.get("credential", "PYATS_USERNAME")
+#tacacs_password = config.get("credential", "PYATS_PASSWORD")
 
 #
 # if 'PYATS_USERNAME' in os.environ:
@@ -31,8 +31,8 @@ def get_ansibel_inventory(inventory_path):
     """Return full Ansible object `inventory_path`."""
 
     if not os.path.exists(inventory_path):
-        raise AssertionError(
-            'File %r do not exist, check your path to the Ansible inventory file' % inventory_path)
+        raise FileNotFoundError('File %r don\'t exist, check your path to the Ansible inventory file' %
+                                inventory_path)
 
     ansible_inventory = Command('ansible-inventory')
     json_inventory = json.loads(
@@ -74,7 +74,7 @@ def get_hostvars(host, inventory):
     return host_vars
 
 
-def create_testbed(inventory_path, group_name):
+def create_testbed(inventory_path, group_name, tacacs_user, tacacs_password):
     """Returns a pyats tesbed object"""
     hosts = get_hosts_from(inventory_path, group_name)
     testbed_obj = Testbed('my_testbed')
