@@ -78,11 +78,11 @@ def create_testbed(inventory_path, group_name, tacacs_user, tacacs_password):
     """Returns a pyats tesbed object"""
     hosts = get_hosts_from(inventory_path, group_name)
     testbed_obj = Testbed('my_testbed')
-
+    inventory = get_ansibel_inventory(inventory_path)
     device_list = []
     for host in hosts:
         host_vars = get_hostvars(host,
-                                 get_ansibel_inventory(inventory_path)
+                                 inventory
                                  )
         dev = Device(host,
                      type='ios',
