@@ -9,6 +9,7 @@ from genie.conf import Genie
 from genie.abstract import Lookup
 from genie.libs import ops  # noqa
 import configparser
+import re
 
 
 # Get your logger for your script
@@ -190,11 +191,11 @@ class LLDP_check(aetest.Testcase):
         self.passed("All devices have lldp enabeld")
 
 
-# Testcase name : vxlan_consistency_check
-class CRC_count_check(aetest.Testcase):
+# Testcase name : interface_check_check
+class interface_check(aetest.Testcase):
     """ This is user Testcases section """
 
-    # First test section
+    # Collection interface data
     @ aetest.test
     def learn_interfaces(self):
         """ Sample test section. Only print """
@@ -208,7 +209,7 @@ class CRC_count_check(aetest.Testcase):
             intf.learn()
             self.all_interfaces[dev.name] = intf.info
 
-    # Second test section
+    # check_CRC
     @ aetest.test
     def check_CRC(self):
 
@@ -253,6 +254,64 @@ class CRC_count_check(aetest.Testcase):
 
         self.passed("All devices' interfaces CRC ERRORS Count is: 'Zero'")
 
+    # description
+    @ aetest.test
+    def check_interface_description(self):
+
+        mega_dict = {}
+        mega_tabular = []
+        for device, ints in self.all_interfaces.items():
+
+            # Filter out 
+            filter_interfaces = dict()
+            for (interface_name, props) in ints.items():
+                if re.match(r"\w+Ethernet(\d\/\d\/\d+|\d\/\d+)", interface_name):
+                    filter_interfaces[interface_name] = props
+
+            mega_dict[device] = {}
+            for name, props in filter_interfaces.items():
+                smaller_tabular = []
+                if "description" in props.keys():
+                    description = props["description"]
+                    oper_status = props["oper_status"]
+                    mega_dict[device][name] = description
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(name)
+                    smaller_tabular.append(description)
+                    smaller_tabular.append(oper_status)
+                    if description == 'CAPWAP':
+                        smaller_tabular.append('Passed')
+                    if description == 'DP':
+                        smaller_tabular.append('Passed')
+                    if re.match(r"(To\s)((\w{3}(ipswi|ipsws|cis|nrkp|nrks|nrkt)\d+)|(nrkdist01))", description):
+                        smaller_tabular.append('Passed')
+                    else:
+                        smaller_tabular.append('Faild')
+                else:
+                    mega_dict[device][name] = None
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(name)
+                    smaller_tabular.append('N/A')
+                    smaller_tabular.append(oper_status)
+                    smaller_tabular.append('Passed')
+                mega_tabular.append(smaller_tabular)
+
+        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'Interface',
+                                   'description',
+                                   'oper_status',
+                                   'Passed/Failed'],
+                          tablefmt='orgtbl'))
+
+        for dev in mega_dict:
+            for intf in mega_dict[dev]:
+                if mega_dict[dev][intf]:
+                    self.failed("{d}: {name} Description: {e}".format(
+                        d=dev, name=intf, e=mega_dict[dev][intf]))
+
+        self.passed("All devices' interfaces Description: 'Correct'")
 
 # #####################################################################
 # ####                       COMMON CLEANUP SECTION                 ###
