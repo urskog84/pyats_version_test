@@ -190,7 +190,52 @@ class LLDP_check(aetest.Testcase):
 
         self.passed("All devices have lldp enabeld")
 
+# Testcase name : logging_server
+class logging_server(aetest.Testcase):
+    """ This thest check syslog server """
 
+    # Collection data from show log command
+    @ aetest.test
+    def show_log(self):
+
+        self.logging_server = {}
+        for dev in self.parent.parameters['dev']:
+            log.info(banner("Gather log data from {}".format(dev.name)))
+            logout = dev.execute("show log")
+            logout = logout.split("Log Buffer")[0]
+            self.logging_server[dev.name] = logout
+    
+    @ aetest.test
+    def check_logging_server(self):
+        mega_dict = {}
+        mega_tabular = []
+        for device, logging_server in self.logging_server.items():
+            mega_dict[device] = {}
+            smaller_tabular = []
+            if re.search("Logging to 10.115.1.44", logging_server):
+                mega_dict[device]['logging_server'] = True
+                smaller_tabular.append(device)
+                smaller_tabular.append('Passed')
+            else: 
+                mega_dict[device]['logging_server'] = False
+                smaller_tabular.append(device)
+                smaller_tabular.append('Failed')
+            mega_tabular.append(smaller_tabular)
+        
+        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'Passed/Failed'],
+                          tablefmt='orgtbl'
+                          ))
+
+        for dev in mega_dict:
+            for logging_server in mega_dict[dev]:
+                if not mega_dict[dev]['logging_server']:
+                    self.failed("{d}: have not correct logging server".format(
+                        d=dev, ))
+
+        self.passed("All devices have the correct logging server")
 # Testcase name : interface_check_check
 class interface_check(aetest.Testcase):
     """ This is user Testcases section """
