@@ -92,7 +92,6 @@ class IOS_version_ceck(aetest.Testcase):
                 check_ver = '03.06.08E'
             else:
                 check_ver = 'Uknown platform'
-
             if version_long:
                 smaller_tabular = []
                 if check_ver == version_long:
@@ -132,9 +131,65 @@ class IOS_version_ceck(aetest.Testcase):
 
         self.passed("All devices have correct Version")
 
+class NTP_check(aetest.Testcase):
+    @ aetest.test
+    def lear_ntp(self):
+        
+        self.ntp = {}
+        for device in self.parent.parameters['dev']:
+            log.info(banner("Gathering NTP Information from {}".format(
+                device.name
+            )))
+            try:
+                ntp = device.parse("show ntp associations")
+            except:
+                self.failed("No output off 'show ntp associations")
+            self.ntp[device.name] = ntp
+
+    @ aetest.test
+    def check_ntp(self):
+        mega_dict = {}
+        mega_tabular = []
+        for device, ntp in self.ntp.items():
+            mega_dict[device] = {}
+            if ntp:
+                ntp_server_count = len(ntp['peer'].keys())
+                first_ntp = list(ntp['peer'].keys())[0] 
+                second_ntp= list(ntp['peer'].keys())[1]
+
+                smaller_tabular = []
+                # ['216.239.35.8', '193.228.143.12']
+
+                if (ntp_server_count == 2) and (first_ntp == '216.239.35.8') and (second_ntp == '193.228.143.12'):
+                    mega_dict[device]['ntp'] = True
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(ntp_server_count)
+                    smaller_tabular.append(first_ntp)
+                    smaller_tabular.append(second_ntp)
+                    smaller_tabular.append('Passed')
+                else:
+                    mega_dict[device]['ntp'] = False
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(ntp_server_count)
+                    smaller_tabular.append(first_ntp)
+                    smaller_tabular.append(second_ntp)
+                    smaller_tabular.append('Failed')
+            mega_tabular.append(smaller_tabular)
+        
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'total amount',
+                                   'first_ntp', 'second_ntp', 'Passed/Failed'],
+                          tablefmt='orgtbl'
+                          ))
+
+        for dev in mega_dict:
+            for logging_server in mega_dict[dev]:
+                if not mega_dict[dev]['ntp']:
+                    self.failed("{d}: have not correct ntp server".format(
+                        d=dev, ))
+        self.passed("All devices have the correct ntp server")
 
 class LLDP_check(aetest.Testcase):
-
     @ aetest.test
     def learn_lldp(self):
 
