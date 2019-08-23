@@ -190,7 +190,7 @@ class LLDP_check(aetest.Testcase):
         self.passed("All devices have lldp enabeld")
 
 
-# Testcase name : vxlan_consistency_check
+# Testcase name : CRC_count_check
 class CRC_count_check(aetest.Testcase):
     """ This is user Testcases section """
 
@@ -252,7 +252,75 @@ class CRC_count_check(aetest.Testcase):
                         d=dev, name=intf, e=mega_dict[dev][intf]))
 
         self.passed("All devices' interfaces CRC ERRORS Count is: 'Zero'")
+# Testcase name : VTP_status_check
 
+
+class VTP_status_check(aetest.Testcase):
+    """ check vtp proprtys """
+
+    @ aetest.test
+    def learn_vtp(self):
+        """ collect test data from command show vtp status """
+
+        self.vtp = {}
+        for device in self.parent.parameters['dev']:
+            log.info(banner("Gathering VTP Information from {}".format(
+                device.name
+            )))
+            try:
+                vtp = device.parse("show vtp status")
+            except:
+                self.failed("No output off 'show vtp status")
+            self.vtp[device.name] = vtp['vtp']
+
+    @ aetest.test
+    def check_vtp(self):
+        desired_version = '1'
+        mega_dict = {}
+        mega_tabular = []
+        for device, vtp in self.vtp.items():
+            mega_dict[device] = {}
+            if device[-1] == '1':  # Last char of devicename is 1
+                desired_mode = "server"
+            else:
+                desired_mode = "client"
+            smaller_tabular = []
+            if (vtp['version'] == desired_version) and (vtp['operating_mode'] == desired_mode):
+                mega_dict[device]['vtp'] = vtp
+                mega_dict[device]['desired_mode'] = desired_mode
+                mega_dict[device]['desired_version'] = desired_version
+                smaller_tabular.append(device)
+                smaller_tabular.append(vtp['version'])
+                smaller_tabular.append(vtp['operating_mode'])
+                smaller_tabular.append('Passed')
+            else:
+                mega_dict[device]['vtp'] = vtp
+                mega_dict[device]['desired_mode'] = desired_mode
+                mega_dict[device]['desired_version'] = desired_version
+                smaller_tabular.append(device)
+                smaller_tabular.append(vtp['version'])
+                smaller_tabular.append(vtp['operating_mode'])
+                smaller_tabular.append('Failed')
+            mega_tabular.append(smaller_tabular)
+
+        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'version',
+                                   'operating_mode', 'Passed/Failed'],
+                          tablefmt='orgtbl'
+                          ))
+
+        for device in mega_dict:
+            for vtp in mega_dict[device]:
+                if not mega_dict[device]['vtp']['version'] == mega_dict[device]['desired_version']:
+                    self.failed("{d}: is runing vtp version {ver} running: should be {d_ver} ".format(
+                        d=device, ver=mega_dict[device]['vtp']['version'], d_ver=desired_version))
+
+                elif not mega_dict[device]['vtp']['operating_mode'] == mega_dict[device]['desired_mode']:
+                    self.failed("{d}: is runing vtp mode {mod} running: should be {d_mode} ".format(
+                        d=device, mod=mega_dict[device]['vtp']['operating_mode'], d_mode=desired_mode))
+        self.passed("All devices correct vtp settings")
 
 # #####################################################################
 # ####                       COMMON CLEANUP SECTION                 ###
