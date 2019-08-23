@@ -9,6 +9,7 @@ from genie.conf import Genie
 from genie.abstract import Lookup
 from genie.libs import ops  # noqa
 import configparser
+import re
 
 
 # Get your logger for your script
@@ -173,7 +174,7 @@ class LLDP_check(aetest.Testcase):
                     smaller_tabular.append('Failed')
             mega_tabular.append(smaller_tabular)
 
-    #    mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+        mega_tabular.append(['-'*len(smaller_tabular)])
 
         log.info(tabulate(mega_tabular,
                           headers=['Device', 'status',
@@ -189,12 +190,57 @@ class LLDP_check(aetest.Testcase):
 
         self.passed("All devices have lldp enabeld")
 
+# Testcase name : logging_server
+class logging_server(aetest.Testcase):
+    """ This thest check syslog server """
 
-# Testcase name : CRC_count_check
-class CRC_count_check(aetest.Testcase):
+    # Collection data from show log command
+    @ aetest.test
+    def show_log(self):
+
+        self.logging_server = {}
+        for dev in self.parent.parameters['dev']:
+            log.info(banner("Gather log data from {}".format(dev.name)))
+            logout = dev.execute("show log")
+            logout = logout.split("Log Buffer")[0]
+            self.logging_server[dev.name] = logout
+    
+    @ aetest.test
+    def check_logging_server(self):
+        mega_dict = {}
+        mega_tabular = []
+        for device, logging_server in self.logging_server.items():
+            mega_dict[device] = {}
+            smaller_tabular = []
+            if re.search("Logging to 10.115.1.44", logging_server):
+                mega_dict[device]['logging_server'] = True
+                smaller_tabular.append(device)
+                smaller_tabular.append('Passed')
+            else: 
+                mega_dict[device]['logging_server'] = False
+                smaller_tabular.append(device)
+                smaller_tabular.append('Failed')
+            mega_tabular.append(smaller_tabular)
+        
+        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'Passed/Failed'],
+                          tablefmt='orgtbl'
+                          ))
+
+        for dev in mega_dict:
+            for logging_server in mega_dict[dev]:
+                if not mega_dict[dev]['logging_server']:
+                    self.failed("{d}: have not correct logging server".format(
+                        d=dev, ))
+
+        self.passed("All devices have the correct logging server")
+# Testcase name : interface_check_check
+class interface_check(aetest.Testcase):
     """ This is user Testcases section """
 
-    # First test section
+    # Collection interface data
     @ aetest.test
     def learn_interfaces(self):
         """ Sample test section. Only print """
@@ -208,7 +254,7 @@ class CRC_count_check(aetest.Testcase):
             intf.learn()
             self.all_interfaces[dev.name] = intf.info
 
-    # Second test section
+    # check_CRC
     @ aetest.test
     def check_CRC(self):
 
@@ -253,6 +299,127 @@ class CRC_count_check(aetest.Testcase):
 
         self.passed("All devices' interfaces CRC ERRORS Count is: 'Zero'")
 # Testcase name : VTP_status_check
+
+    # description
+    @ aetest.test
+    def check_interface_description(self):
+
+        mega_dict = {}
+        mega_tabular = []
+        for device, ints in self.all_interfaces.items():
+
+            # Filter out 
+            filter_interfaces = dict()
+            for (interface_name, props) in ints.items():
+                if re.match(r"\w+Ethernet(\d\/\d\/\d+|\d\/\d+)", interface_name):
+                    filter_interfaces[interface_name] = props
+
+            mega_dict[device] = {}
+            for name, props in filter_interfaces.items():
+                smaller_tabular = []
+                if "description" in props.keys():
+                    description = props["description"]
+                    oper_status = props["oper_status"]
+                    mega_dict[device][name] = description
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(name)
+                    smaller_tabular.append(description)
+                    smaller_tabular.append(oper_status)
+                    if description == 'CAPWAP':
+                        smaller_tabular.append('Passed')
+                    if description == 'DP':
+                        smaller_tabular.append('Passed')
+                    if re.match(r"(To\s)((\w{3}(ipswi|ipsws|cis|nrkp|nrks|nrkt)\d+)|(nrkdist01))", description):
+                        smaller_tabular.append('Passed')
+                    else:
+                        smaller_tabular.append('Faild')
+                else:
+                    mega_dict[device][name] = None
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(name)
+                    smaller_tabular.append('N/A')
+                    smaller_tabular.append(oper_status)
+                    smaller_tabular.append('Passed')
+                mega_tabular.append(smaller_tabular)
+
+        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'Interface',
+                                   'description',
+                                   'oper_status',
+                                   'Passed/Failed'],
+                          tablefmt='orgtbl'))
+
+        for dev in mega_dict:
+            for intf in mega_dict[dev]:
+                if mega_dict[dev][intf]:
+                    self.failed("{d}: {name} Description: {e}".format(
+                        d=dev, name=intf, e=mega_dict[dev][intf]))
+
+        self.passed("All devices' interfaces Description: 'Correct'")
+
+class NTP_check(aetest.Testcase):
+    @ aetest.test
+    def lear_ntp(self):
+
+        self.ntp = {}
+        for device in self.parent.parameters['dev']:
+            log.info(banner("Gathering NTP Information from {}".format(
+                device.name
+            )))
+            try:
+                ntp = device.parse("show ntp associations")
+            except:
+                self.failed("No output off 'show ntp associations")
+            self.ntp[device.name] = ntp
+
+    @ aetest.test
+    def check_ntp(self):
+        mega_dict = {}
+        mega_tabular = []
+        for device, ntp in self.ntp.items():
+            mega_dict[device] = {}
+            smaller_tabular = []
+            if ntp:
+                ntp_server_count = len(ntp['peer'].keys())
+                first_ntp = list(ntp['peer'].keys())[0] 
+                second_ntp= list(ntp['peer'].keys())[1]
+
+                smaller_tabular = []
+                # ['216.239.35.8', '193.228.143.12']
+
+                if (ntp_server_count == 2) and (first_ntp == '216.239.35.8') and (second_ntp == '193.228.143.12'):
+                    mega_dict[device]['ntp'] = True
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(ntp_server_count)
+                    smaller_tabular.append(first_ntp)
+                    smaller_tabular.append(second_ntp)
+                    smaller_tabular.append('Passed')
+                else:
+                    mega_dict[device]['ntp'] = False
+                    smaller_tabular.append(device)
+                    smaller_tabular.append(ntp_server_count)
+                    smaller_tabular.append(first_ntp)
+                    smaller_tabular.append(second_ntp)
+                    smaller_tabular.append('Failed')
+                mega_tabular.append(smaller_tabular)
+        
+        mega_tabular.append(['-'*len(smaller_tabular)])
+
+        log.info(tabulate(mega_tabular,
+                          headers=['Device', 'tot',
+                                   'first_ntp', 'second_ntp', 'Passed/Failed'],
+                          tablefmt='orgtbl'
+                          ))
+
+        for dev in mega_dict:
+            for logging_server in mega_dict[dev]:
+                if not mega_dict[dev]['ntp']:
+                    self.failed("{d}: have not correct ntp server".format(
+                        d=dev, ))
+        self.passed("All devices have the correct ntp server")
+
 
 
 class VTP_status_check(aetest.Testcase):
