@@ -12,3 +12,6 @@ simply rename the config_template.ini and modify to your need
 ´easypy test_job.py´
 ## with html report
 ´easypy test_job.py -html_logs html_logs/´
+
+# Run with docker 
+docker run -it -v ${pwd}:/pyats_local (docker build . -q) 
