@@ -1,4 +1,0 @@
-genie
-tabulate
-pyats
-sh
