@@ -7,6 +7,12 @@ from ats.easypy import run
 
 # All run() must be inside a main function
 def main(runtime):
+
+    runtime.job.name = 'my-job-overwrite-name'
+#    runtime.job.report.attachment
+
     # Find the location of the script in relation to the job file
     run(testscript='test_version.py', runtime=runtime)
     run(testscript='test_interface.py', runtime=runtime)
+    mailto_list = ['karl.petter.andersson@gmail.com']
+    runtime.mailbot.mailto = mailto_list

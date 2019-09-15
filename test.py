@@ -16,7 +16,7 @@ tacacs_password = config.get("credential", "PYATS_PASSWORD")
 testbed = create_testbed(inventory_path, group_name,
                          tacacs_user, tacacs_password)
 
-sw1 = testbed.devices['fspipswi001']
+sw1 = testbed.devices['fspipswi002']
 #sw1 = testbed.devices["tstipswi001"]
 #sw2 = testbed.devices["tstipswi002"]
 
