@@ -40,8 +40,7 @@ class common_setup(aetest.CommonSetup):
     # Connect to each device in the testbed
     @aetest.subsection
     def connect(self, testbed):
-        genie_testbed = create_testbed(
-            inventory_path, group_name, tacacs_user, tacacs_password)
+        genie_testbed = Genie.init(testbed)
         self.parent.parameters['testbed'] = genie_testbed
         device_list = []
         for device in genie_testbed.devices.values():

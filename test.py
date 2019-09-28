@@ -1,20 +1,23 @@
-from testbed_from_inventory import create_testbed
+#from testbed_from_inventory import create_testbed
 import configparser
 from genie.abstract import Lookup
 from genie.libs import ops  # noqa
-
+from genie.conf import Genie
 from prettytable import PrettyTable
 
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-inventory_path = config.get("inventory", "path")
-group_name = config.get("inventory", "group_name")
-tacacs_user = config.get("credential", "PYATS_USERNAME")
-tacacs_password = config.get("credential", "PYATS_PASSWORD")
+#inventory_path = config.get("inventory", "path")
+#group_name = config.get("inventory", "group_name")
+#tacacs_user = config.get("credential", "PYATS_USERNAME")
+#tacacs_password = config.get("credential", "PYATS_PASSWORD")
 
-testbed = create_testbed(inventory_path, group_name,
-                         tacacs_user, tacacs_password)
+# testbed = create_testbed(inventory_path, group_name,
+#                         tacacs_user, tacacs_password)
+
+testbed = Genie.init('tests/testbed.yml')
+
 
 sw1 = testbed.devices['fspipswi002']
 #sw1 = testbed.devices["tstipswi001"]

@@ -1,0 +1,17 @@
+testbed:
+  name: pyATS_IOS_Example_Testbed
+devices:
+  fspipswi002:
+    connections:
+      defaults:
+        class: 'unicon.Unicon'
+      a: 
+        protocol: ssh
+        ip: 192.168.1.188
+        port: 22
+    passwords:
+      tacacs: truhe8a8
+    tacacs: 
+      username: admin
+    type: ios
+    os: ios
