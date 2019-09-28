@@ -39,8 +39,7 @@ class common_setup(aetest.CommonSetup):
     # Connect to each device in the testbed
     @aetest.subsection
     def connect(self, testbed):
-        genie_testbed = create_testbed(
-            inventory_path, group_name, tacacs_user, tacacs_password)
+        genie_testbed = Genie.init(testbed)
         self.parent.parameters['testbed'] = genie_testbed
         device_list = []
         for device in genie_testbed.devices.values():
@@ -222,7 +221,7 @@ class logging_server(aetest.Testcase):
                 smaller_tabular.append('Failed')
             mega_tabular.append(smaller_tabular)
         
-        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+        mega_tabular.append(['--','--','--'])
 
         log.info(tabulate(mega_tabular,
                           headers=['Device', 'Passed/Failed'],
@@ -287,7 +286,7 @@ class VTP_status_check(aetest.Testcase):
                 smaller_tabular.append('Failed')
             mega_tabular.append(smaller_tabular)
 
-        mega_tabular.append(['-'*sum(len(i) for i in smaller_tabular)])
+        mega_tabular.append(['--','--'])
 
         log.info(tabulate(mega_tabular,
                           headers=['Device', 'version',
@@ -335,7 +334,7 @@ class NTP_check(aetest.Testcase):
                 ntp_server_count = len(ntp['peer'].keys())
                 first_ntp = list(ntp['peer'].keys())[0] 
                 second_ntp= list(ntp['peer'].keys())[1]
-
+ 
                 smaller_tabular = []
                 # ['216.239.35.8', '193.228.143.12']
 
@@ -355,7 +354,7 @@ class NTP_check(aetest.Testcase):
                     smaller_tabular.append('Failed')
                 mega_tabular.append(smaller_tabular)
         
-        mega_tabular.append(['-'*len(smaller_tabular)])
+        mega_tabular.append(['-','-','-'])
 
         log.info(tabulate(mega_tabular,
                           headers=['Device', 'tot',
