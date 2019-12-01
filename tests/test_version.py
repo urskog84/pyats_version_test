@@ -15,15 +15,6 @@ import re
 # Get your logger for your script
 log = logging.getLogger(__name__)
 
-config = configparser.ConfigParser()
-config.read("config.ini")
-
-inventory_path = config.get("inventory", "path")
-group_name = config.get("inventory", "group_name")
-
-tacacs_user = config.get("credential", "PYATS_USERNAME")
-tacacs_password = config.get("credential", "PYATS_PASSWORD")
-
 
 ###################################################################
 #                  COMMON SETUP SECTION                           #
@@ -86,31 +77,33 @@ class IOS_version_ceck(aetest.Testcase):
             platform = version['platform']
 
             if platform == 'Catalyst 4500 L3 Switch ':
-                check_ver = '03.06.07.E'
+                desierd_ver = '03.06.07.E'
             elif platform == 'Catalyst L3 Switch':
-                check_ver = '03.06.08E'
+                desierd_ver = '03.06.08E'
+            elif platform == 'C2960':
+                desierd_ver = '15.0(2)SE11'
             else:
-                check_ver = 'Uknown platform'
+                desierd_ver = 'Uknown platform'
 
             if version_long:
                 smaller_tabular = []
-                if check_ver == version_long:
+                if desierd_ver == version_long:
                     mega_dict[device]['version_long'] = version_long
-                    mega_dict[device]['check_ver'] = check_ver
+                    mega_dict[device]['check_ver'] = desierd_ver
                     mega_dict[device]['platform'] = platform
                     smaller_tabular.append(device)
                     smaller_tabular.append(platform)
                     smaller_tabular.append(version_long)
-                    smaller_tabular.append(check_ver)
+                    smaller_tabular.append(desierd_ver)
                     smaller_tabular.append('Passed')
                 else:
                     mega_dict[device]['version_long'] = version_long
-                    mega_dict[device]['check_ver'] = check_ver
+                    mega_dict[device]['check_ver'] = desierd_ver
                     mega_dict[device]['platform'] = platform
                     smaller_tabular.append(device)
                     smaller_tabular.append(platform)
                     smaller_tabular.append(version_long)
-                    smaller_tabular.append(check_ver)
+                    smaller_tabular.append(desierd_ver)
                     smaller_tabular.append('Failed')
             mega_tabular.append(smaller_tabular)
 
@@ -211,7 +204,7 @@ class logging_server(aetest.Testcase):
         for device, logging_server in self.logging_server.items():
             mega_dict[device] = {}
             smaller_tabular = []
-            if re.search("Logging to 10.115.1.44", logging_server):
+            if re.search("Logging to 192.168.1.3", logging_server):
                 mega_dict[device]['logging_server'] = True
                 smaller_tabular.append(device)
                 smaller_tabular.append('Passed')
@@ -338,7 +331,7 @@ class NTP_check(aetest.Testcase):
                 smaller_tabular = []
                 # ['216.239.35.8', '193.228.143.12']
 
-                if (ntp_server_count == 2) and (first_ntp == '216.239.35.8') and (second_ntp == '193.228.143.12'):
+                if (ntp_server_count == 2) and (first_ntp == '216.239.35.8') and (second_ntp == '91.209.0.20'):
                     mega_dict[device]['ntp'] = True
                     smaller_tabular.append(device)
                     smaller_tabular.append(ntp_server_count)

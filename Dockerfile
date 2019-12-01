@@ -5,4 +5,4 @@ COPY requirements.txt /pyats/requirements.txt
 #COPY pyats.conf /etc/pyats.conf
 COPY tests /pyats/tests
 
-CMD ["easypy", "tests/test_job.py", "-html_logs", "/pyats_local/html_logs"]
+CMD ["easypy", "tests/test_job.py", "-testbed_file", "tests/testbed.yml", "-html_logs", "/pyats_local/html_logs"]

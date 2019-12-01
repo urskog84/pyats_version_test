@@ -16,16 +16,6 @@ import re
 # Get your logger for your script
 log = logging.getLogger(__name__)
 
-config = configparser.ConfigParser()
-config.read("config.ini")
-
-inventory_path = config.get("inventory", "path")
-group_name = config.get("inventory", "group_name")
-
-tacacs_user = config.get("credential", "PYATS_USERNAME")
-tacacs_password = config.get("credential", "PYATS_PASSWORD")
-
-
 ###################################################################
 #                  COMMON SETUP SECTION                           #
 ###################################################################

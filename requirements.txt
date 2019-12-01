@@ -2,3 +2,4 @@ genie
 tabulate
 pyats
 sh
+ipython

@@ -1,7 +1,7 @@
 testbed:
   name: pyATS_IOS_Example_Testbed
 devices:
-  fspipswi002:
+  fspipswi001:
     connections:
       defaults:
         class: 'unicon.Unicon'

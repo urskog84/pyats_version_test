@@ -16,16 +16,6 @@ import copy
 # Get your logger for your script
 log = logging.getLogger(__name__)
 
-config = configparser.ConfigParser()
-config.read("config.ini")
-
-inventory_path = config.get("inventory", "path")
-group_name = config.get("inventory", "group_name")
-
-tacacs_user = config.get("credential", "PYATS_USERNAME")
-tacacs_password = config.get("credential", "PYATS_PASSWORD")
-
-
 ###################################################################
 #                  COMMON SETUP SECTION                           #
 ###################################################################
@@ -58,8 +48,8 @@ class common_setup(aetest.CommonSetup):
         self.parent.parameters.update(dev=device_list)
 
 
-###################################################################
- #                    TESTCASES SECTION                           #
+##################################################################
+#                    TESTCASES SECTION                           #
 ##################################################################
 
 # Testcase name : interface_check_check
@@ -107,9 +97,8 @@ class interface_config_check(aetest.Testcase):
             for interface, props in interfaces_org.items():
                 if not props["switchport_mode"] == 'static_access':
                     interfaces.pop(interface)
-                    
-                
-                if 
+
+                if
                 counters = props.get('counters')
                 if counters:
                     smaller_tabular = []
