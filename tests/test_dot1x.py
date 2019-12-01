@@ -74,12 +74,11 @@ class dot1x_interface_config(aetest.Testcase):
                 decsc = v['description']
             else:
                 decsc = None
-            if not 'Vlan' in intf:
+            if re.match(r"FastEthernet|GigabitEthernet|TenGigabitEthernet", intf):
                 intf_obj = {}
                 intf_obj[intf] = {
                     'description': decsc,
                     'access_vlan': switchports[intf]['access_vlan'],
-
                 }
 
                 if 'voice_vlan' in switchports[intf]:
@@ -106,7 +105,7 @@ class dot1x_interface_config(aetest.Testcase):
                     mega_dict[device][intf_name]['Faild'] = False
                     smaller_tabular.append(device)
                     smaller_tabular.append(intf_name)
-                    smaller_tabular.append(props["description"])
+                    smaller_tabular.append(props['description'])
                     smaller_tabular.append(props['access_vlan'])
                     smaller_tabular.append('Passed')
                 # Accessport
@@ -114,7 +113,7 @@ class dot1x_interface_config(aetest.Testcase):
                     mega_dict[device][intf_name]['Faild'] = False
                     smaller_tabular.append(device)
                     smaller_tabular.append(intf_name)
-                    smaller_tabular.append(props["description"])
+                    smaller_tabular.append(props['description'])
                     smaller_tabular.append(props['access_vlan'])
                     smaller_tabular.append('Passed')
                 else:
