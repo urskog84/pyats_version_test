@@ -3,15 +3,14 @@ testbed:
 devices:
   fspipswi001:
     connections:
-      defaults:
-        class: 'unicon.Unicon'
-      a: 
+      cli:
         protocol: ssh
-        ip: 192.168.1.188
+        ip: 192.168.1.55
         port: 22
-    passwords:
-      tacacs: truhe8a8
-    tacacs: 
-      username: admin
+    credentials:
+      default:
+        password: truhe8a8
+        username: admin
     type: ios
     os: ios
+    
