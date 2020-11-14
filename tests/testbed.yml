@@ -1,5 +1,12 @@
 testbed:
   name: pyATS_IOS_Example_Testbed
+  credentials:
+    default:
+      password: truhe8a8
+      username: admin
+    enable:
+      password: cisco
+
 devices:
   fspipswi001:
     connections:
@@ -7,10 +14,5 @@ devices:
         protocol: ssh
         ip: 192.168.1.55
         port: 22
-    credentials:
-      default:
-        password: truhe8a8
-        username: admin
     type: ios
     os: ios
-    
