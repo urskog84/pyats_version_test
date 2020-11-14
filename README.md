@@ -1,17 +1,29 @@
-# load the virtual python enviralment
-`source venv/bin/activate`
+# PyATS Tests
 
-# testbed_from_inventory
-this module add a function to create a pyats testbed object from a ansible inventory.
+My first attempt to test create a Network atuomation tests with PyATS and Genie
 
-# credential - username/password
-the credentials are provided ini the "config.ini" file
-simply rename the config_template.ini and modify to your need 
 
-# To run the test
-`easypy test_job.py`
-## with html report
-`easypy test_job.py -html_logs html_logs/`
+## How to get started
+- git clone https://github.com/urskog84/pyats_version_test.git
+- cd pyats_version_test
+- edit /tests/testbed.yml to your need
 
-# Run with docker 
-`docker run --rm -it -p 8080:8080 -v ${pwd}:/pyats_local (docker build . -q)` 
+
+
+## Run the tests with docker 
+
+```
+# Interactive 
+
+docker run --rm -it -p 8080:8080 -v ${pwd}:/pyats_local $(docker build . -q)
+``` 
+``` 
+# Silet
+
+docker run --rm -p 8080:8080 -v ${pwd}:/pyats_local $(docker build . -q)
+``` 
+
+## After the are finish
+you can access the html report @ http://localhost:8080
+
+Or you can use your imagination :brain: and publish the static html file at the interweb :spider_web:

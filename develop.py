@@ -18,6 +18,8 @@ device.connect()
 interfaces = device.parse("show interfaces")
 switchports = device.parse("show interfaces switchport")
 
+ntp = device.parse("show ntp associations")
+
 interface_list = {}
 for intf, v in interfaces.items():
     if 'description' in v:
