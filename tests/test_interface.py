@@ -1,7 +1,5 @@
-
 #!/bin/env python
 
-from testbed_from_inventory import create_testbed
 import logging
 from tabulate import tabulate
 from ats import aetest

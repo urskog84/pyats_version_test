@@ -1,6 +1,5 @@
 #!/bin/env python
 
-from testbed_from_inventory import create_testbed
 import logging
 from tabulate import tabulate
 from ats import aetest
@@ -331,7 +330,7 @@ class NTP_check(aetest.Testcase):
                 smaller_tabular = []
                 # ['216.239.35.8', '193.228.143.12']
 
-                if (ntp_server_count == 2) and (first_ntp == '216.239.35.8') and (second_ntp == '91.209.0.20'):
+                if (ntp_server_count == 2) and (first_ntp == '194.58.203.20') and (second_ntp == '91.209.0.20'):
                     mega_dict[device]['ntp'] = True
                     smaller_tabular.append(device)
                     smaller_tabular.append(ntp_server_count)
